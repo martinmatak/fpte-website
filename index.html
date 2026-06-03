@@ -17,6 +17,7 @@
         <a href="#abstract">Abstract</a>
         <a href="#approach">Approach</a>
         <a href="#results">Results</a>
+        <a href="#citation">Citation</a>
       </nav>
     </header>
 
@@ -31,6 +32,10 @@
           <p class="authors">
             Martin Matak, Mohanraj Devendran Shanthi, Karl Van Wyk, Tucker Hermans
           </p>
+          <div class="action-links" aria-label="Project links">
+            <a class="button-link" href="https://arxiv.org/abs/2509.07162">Paper</a>
+            <a class="button-link secondary" href="https://bitbucket.org/robot-learning/fpte/src/main/">Code</a>
+          </div>
           <figure class="paper-banner">
             <img
               src="assets/banner.png"
@@ -296,11 +301,64 @@
       </section>
     </main>
 
-    <footer class="site-footer">
-      <p>
-        First Plan Then Evaluate: Multi-Target Planning with Post-Planning Success
-        Evaluation Improves Learning-Based Grasping Pipelines.
-      </p>
+    <footer id="citation" class="site-footer">
+      <div class="citation-block">
+        <div class="citation-heading">
+          <div>
+            <p class="section-kicker">Citation</p>
+            <h2>BibTeX</h2>
+          </div>
+          <button class="copy-button" type="button" data-copy-target="bibtex">
+            Copy BibTeX
+          </button>
+        </div>
+        <pre><code id="bibtex">@misc{matak2025fpte,
+  title = {First Plan Then Evaluate: Use a Vectorized Motion Planner for Grasping},
+  author = {Matak, Martin and Shanthi, Mohanraj Devendran and Van Wyk, Karl and Hermans, Tucker},
+  year = {2025},
+  eprint = {2509.07162},
+  archivePrefix = {arXiv},
+  primaryClass = {cs.RO},
+  doi = {10.48550/arXiv.2509.07162},
+  url = {https://arxiv.org/abs/2509.07162}
+}</code></pre>
+      </div>
     </footer>
+    <script>
+      document.querySelectorAll("[data-copy-target]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const target = document.getElementById(button.dataset.copyTarget);
+          if (!target) return;
+          const text = target.textContent;
+
+          try {
+            if (navigator.clipboard && window.isSecureContext) {
+              await navigator.clipboard.writeText(text);
+            } else {
+              const textarea = document.createElement("textarea");
+              textarea.value = text;
+              textarea.setAttribute("readonly", "");
+              textarea.style.position = "fixed";
+              textarea.style.opacity = "0";
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand("copy");
+              document.body.removeChild(textarea);
+            }
+            button.textContent = "Copied";
+            window.setTimeout(() => {
+              button.textContent = "Copy BibTeX";
+            }, 1600);
+          } catch {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(target);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            button.textContent = "Selected";
+          }
+        });
+      });
+    </script>
   </body>
 </html>
