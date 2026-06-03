@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>First Plan Then Evaluate | FPTE</title>
+    <meta
+      name="description"
+      content="Project page for First Plan Then Evaluate, a multi-target planning framework that evaluates grasp success after trajectory planning."
+    >
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="FPTE home">FPTE</a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="#abstract">Abstract</a>
+        <a href="#approach">Approach</a>
+        <a href="#results">Results</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="paper-header" aria-labelledby="paper-title">
+        <div class="section-inner narrow">
+          <p class="eyebrow">Learning-based dexterous grasping</p>
+          <h1 id="paper-title">
+            First Plan Then Evaluate: Multi-Target Planning with Post-Planning
+            Success Evaluation Improves Learning-Based Grasping Pipelines
+          </h1>
+          <p class="authors">
+            Martin Matak, Mohanraj Devendran Shanthi, Karl Van Wyk, Tucker Hermans
+          </p>
+          <figure class="paper-banner">
+            <img
+              src="assets/banner.png"
+              alt="KUKA arm with Allegro hand grasping objects from shelves, tabletop scenes, and cluttered environments."
+            >
+            <figcaption>
+              Grasps from different shelves and table heights. The robot grasps the
+              target object while avoiding other objects and the environment.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="abstract" class="section">
+        <div class="section-inner narrow">
+          <p class="section-kicker">Abstract</p>
+          <h2>Plan to the candidates first, then score what the robot can actually execute.</h2>
+          <p>
+            Autonomous multi-finger grasping is a fundamental capability in robotic
+            manipulation. Optimization-based approaches show strong performance, but
+            tend to be sensitive to initialization and are potentially time-consuming.
+            As an alternative, the generator-evaluator-planner framework has been
+            proposed. A generator generates grasp candidates, an evaluator ranks the
+            proposed grasps, and a motion planner plans a trajectory to the
+            highest-ranked grasp. If the planner does not find a trajectory, a new
+            trajectory optimization is started with the next-best grasp as the target
+            and so on.
+          </p>
+          <p>
+            However, executing lower-ranked grasps means a lower chance of grasp
+            success, and multiple trajectory optimizations are time-consuming.
+            Alternatively, relaxing the threshold for motion planning accuracy allows
+            for easier computation of a successful trajectory but implies lower
+            accuracy in estimating grasp success likelihood. We propose a framework
+            that plans trajectories to a set of generated grasp targets, estimates
+            grasp success likelihood at the terminal configuration of the planned
+            trajectories, and executes the trajectory most likely to succeed.
+          </p>
+          <p>
+            Experiments show that FPTE improves over the traditional
+            generator-evaluator-planner framework across different objects,
+            generators, and motion planners, and successfully generalizes to novel
+            real-world environments, including different shelves and table heights.
+          </p>
+        </div>
+      </section>
+
+      <section id="approach" class="section section-contrast">
+        <div class="section-inner">
+          <div class="split">
+            <div>
+              <p class="section-kicker">Approach</p>
+              <h2>FPTE changes where grasp likelihood is evaluated.</h2>
+              <p>
+                The traditional pipeline ranks grasp targets before planning. FPTE
+                instead uses generated grasps as targets for the planner, keeps every
+                executable collision-free trajectory, then evaluates the terminal
+                robot configuration reached by each trajectory.
+              </p>
+            </div>
+            <ol class="steps" aria-label="FPTE stages">
+              <li>
+                <strong>Generate candidates</strong>
+                <span>
+                  A learned generator proposes a batch of object-frame grasps from a
+                  partial point cloud encoded with Basis Point Set features.
+                </span>
+              </li>
+              <li>
+                <strong>Plan to all targets</strong>
+                <span>
+                  A vectorized motion planner computes trajectories to all candidates
+                  in parallel while avoiding the object and environment.
+                </span>
+              </li>
+              <li>
+                <strong>Evaluate terminal grasps</strong>
+                <span>
+                  A learned evaluator scores the grasps resulting from the planned
+                  trajectories, and the robot executes the highest-scoring trajectory.
+                </span>
+              </li>
+            </ol>
+          </div>
+
+          <figure class="figure-card wide-figure">
+            <img
+              src="assets/pipeline.png"
+              alt="FPTE pipeline: generator proposes target grasps, vectorized motion planner plans to all targets, evaluator ranks resulting trajectories by grasp success likelihood."
+            >
+            <figcaption>
+              FPTE evaluates grasp success at the terminal configuration of planned
+              trajectories rather than at the initially generated targets.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="results" class="section">
+        <div class="section-inner">
+          <p class="section-kicker">Results</p>
+          <h2>Higher success across simulators, planners, generators, and real-world scenes.</h2>
+          <div class="result-summary">
+            <p>
+              In simulation, FPTE was evaluated with cuRobo and Fabrics planners,
+              three generator architectures, 20 object shapes, and 100 table poses.
+              The post-planning evaluator consistently improved grasp success over
+              the traditional generate-evaluate-plan order.
+            </p>
+            <p>
+              In the real world, the system used a KUKA LBR4 arm with a 16 DoF
+              Allegro hand. Across 11 novel objects and five table locations per
+              object, FPTE reached an 80% success rate compared with 22% for the
+              traditional pipeline.
+            </p>
+          </div>
+
+          <div class="figure-grid">
+            <figure class="figure-card">
+              <img
+                src="assets/sim-experiments-results.png"
+                alt="Simulation success rate comparison across generators, motion planners, FPTE, and traditional baselines."
+              >
+              <figcaption>
+                FPTE improves success rates across generator architectures and
+                motion planner choices.
+              </figcaption>
+            </figure>
+
+            <figure class="figure-card">
+              <img
+                src="assets/ablation-study.png"
+                alt="Ablation chart showing FPTE robustness across inverse kinematics position error thresholds."
+              >
+              <figcaption>
+                Success remains higher for FPTE as IK solution accuracy varies; the
+                traditional method degrades as error increases.
+              </figcaption>
+            </figure>
+
+            <figure class="figure-card">
+              <img
+                src="assets/ap-ik-threshold.png"
+                alt="Evaluator average precision across different inverse kinematics position thresholds."
+              >
+              <figcaption>
+                Evaluator average precision drops with larger IK thresholds in the
+                traditional pipeline, but not with FPTE.
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-contrast">
+        <div class="section-inner">
+          <div class="split">
+            <div>
+              <p class="section-kicker">Real-world generalization</p>
+              <h2>Object-centric planning transfers beyond the training setup.</h2>
+              <p>
+                The learned models were trained on simulated single-object scenes
+                from a fixed table height. At deployment, FPTE grasps novel objects,
+                handles different table heights, and plans around shelves, clutter,
+                and reconstructed object meshes.
+              </p>
+            </div>
+            <div class="callout">
+              <strong>90% vs. 26%</strong>
+              <span>
+                Average predicted success likelihood for executed FPTE grasps versus
+                the traditional baseline in real-world trials.
+              </span>
+            </div>
+          </div>
+
+          <div class="figure-grid real-world-grid">
+            <figure class="figure-card">
+              <img
+                class="object-fit-contain"
+                src="assets/real-world-objects.jpg"
+                alt="Robot platform and real-world test objects of varying shape, size, mass, rigidity, and opaqueness."
+              >
+              <figcaption>
+                Robot platform and the objects used for the real-world evaluation.
+              </figcaption>
+            </figure>
+
+            <figure class="figure-card">
+              <img
+                src="assets/rw-grasp-distribution.png"
+                alt="Generated grasp distribution around novel real-world objects."
+              >
+              <figcaption>
+                The generator captures a diverse grasp distribution and generalizes
+                to novel objects.
+              </figcaption>
+            </figure>
+
+            <figure class="figure-card span-two">
+              <img
+                class="crop-grasps"
+                src="assets/rw-grasps.png"
+                alt="Grid of successful real-world grasps using the Allegro hand on everyday objects."
+              >
+              <figcaption>
+                Examples of resulting real-world grasps selected by FPTE.
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-inner">
+          <div class="split">
+            <div>
+              <p class="section-kicker">Evaluator</p>
+              <h2>Post-planning scoring produces higher-confidence successful grasps.</h2>
+              <p>
+                The evaluator is trained on simulated positive and negative samples,
+                including hard negatives created by perturbing successful grasps.
+                In deployment, it scores the actual robot configurations reached by
+                planning, making the ranking aligned with executable grasps.
+              </p>
+            </div>
+            <figure class="figure-card compact-figure">
+              <img
+                src="assets/banner.png"
+                alt="Real-world grasping examples in shelves, table-height changes, and clutter."
+              >
+              <figcaption>
+                FPTE grasps target objects while avoiding collisions in novel
+                shelves, table heights, and multi-object environments.
+              </figcaption>
+            </figure>
+          </div>
+
+          <div class="figure-grid evaluator-grid">
+            <figure class="figure-card">
+              <img
+                src="assets/pr-curve.png"
+                alt="Precision-recall curves for the learned evaluator in simulation and real-world settings."
+              >
+              <figcaption>
+                Precision-recall curves show that the learned evaluator transfers
+                from simulated training to real-world evaluation.
+              </figcaption>
+            </figure>
+
+            <figure class="figure-card">
+              <img
+                src="assets/rw-evaluator.png"
+                alt="Predicted evaluator success likelihoods and real-world grasp outcomes."
+              >
+              <figcaption>
+                Real-world predictions show FPTE produces higher-confidence
+                successful grasps.
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>
+        First Plan Then Evaluate: Multi-Target Planning with Post-Planning Success
+        Evaluation Improves Learning-Based Grasping Pipelines.
+      </p>
+    </footer>
+  </body>
+</html>
